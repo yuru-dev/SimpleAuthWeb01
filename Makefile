@@ -10,3 +10,8 @@ docker-run:
 docker-build:
 	sudo docker build . -t simpleauthweb01
 
+local-build:
+	CGO_ENABLED=0 go build -o server
+
+local-run:
+	./server
