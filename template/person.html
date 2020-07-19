@@ -1,4 +1,5 @@
-<table>
+{{ define "body" }}
+<table class="table">
   <tr>
     <th>Name</th>
     <td>{{ .Person.Name }}</td>
@@ -24,3 +25,4 @@
     <td>{{ .Person.Geo }}</td>
   </tr>
 </table>
+{{ end }}

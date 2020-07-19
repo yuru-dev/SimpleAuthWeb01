@@ -117,15 +117,19 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 func personHandler(w http.ResponseWriter, r *http.Request) {
 	i, _ := strconv.Atoi(r.URL.Path[8:])
 	log.Printf("person %v\n", i)
+	session, _ := store.Get(r, sessionName)
+	username := session.Values["username"]
 	people := loadData()
 	person := people[i]
-	t, err := template.ParseFiles("template/person.html")
+	t, err := template.ParseFiles("template/base.html", "template/person.html")
 	if err != nil {
 		log.Fatalf("template error: %v", err)
 	}
-	err = t.Execute(w, struct {
-		Person Person
-	}{Person: person})
+	params := map[string]interface{}{
+		"Username": username,
+		"Person":   person,
+	}
+	err = t.Execute(w, params)
 	if err != nil {
 		log.Printf("failed to execute template: %v", err)
 	}
