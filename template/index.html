@@ -1,8 +1,8 @@
 {{ define "body" }}
 <table class="table">
-  {{ range $i, $v := .Param }}
+  {{ range $v := .Param }}
   <tr>
-    <td><a href="/person/{{ $i }}">{{ $i }}</a></td>
+    <td><a href="/person/{{ $v.ID }}">{{ $v.ID }}</a></td>
     <td>{{ $v.Name }}</td>
     <td>{{ $v.Email }}</td>
   </tr>

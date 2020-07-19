@@ -1,4 +1,5 @@
 {{ define "body" }}
+{{ if .Username }}
 {{ with .Param }}
 <table class="table">
   <tr>
@@ -26,5 +27,8 @@
     <td>{{ .Geo }}</td>
   </tr>
 </table>
+{{ end }}
+{{ else }}
+<a href="/login?url=/people/{{ .Param }}">Login</a>
 {{ end }}
 {{ end }}

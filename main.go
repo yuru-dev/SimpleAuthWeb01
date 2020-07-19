@@ -19,6 +19,7 @@ var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
 var sessionName = "session"
 
 type Person struct {
+	ID      int
 	Name    string `json:"name"`
 	Email   string `json:"email"`
 	Company string `json:"company"`
@@ -32,6 +33,9 @@ func loadData() (result []Person) {
 	err := json.Unmarshal(raw, &result)
 	if err != nil {
 		log.Printf("err %v\n", err)
+	}
+	for i := range result {
+		result[i].ID = i
 	}
 	// log.Printf("data %v\n", result)
 	return
@@ -74,7 +78,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, sessionName)
-	session.Values["username"] = ""
+	session.Values["username"] = nil
 	_ = session.Save(r, w)
 	renderPage(w, r, session, "logout.html", nil)
 }
@@ -98,10 +102,15 @@ func renderPage(w http.ResponseWriter, r *http.Request, session *sessions.Sessio
 
 func personHandler(w http.ResponseWriter, r *http.Request) {
 	i, _ := strconv.Atoi(r.URL.Path[8:])
-	people := loadData()
-	person := people[i]
+	var person Person
 	session, _ := store.Get(r, sessionName)
-	renderPage(w, r, session, "person.html", person)
+	if session.Values["username"] != nil {
+		people := loadData()
+		person = people[i]
+		renderPage(w, r, session, "person.html", person)
+	} else {
+		renderPage(w, r, session, "person.html", i)
+	}
 }
 
 func main() {
