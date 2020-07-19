@@ -3,8 +3,10 @@ package main
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -15,7 +17,27 @@ import (
 var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
 var sessionName = "session"
 
+type Person struct {
+	Name    string `json:"name"`
+	Email   string `json:"email"`
+	Company string `json:"company"`
+	City    string `json:"city"`
+	Zip     string `json:"zip"`
+	Geo     string `json:"geo"`
+}
+
+func loadData() (result []Person) {
+	raw, _ := ioutil.ReadFile("./data.json")
+	err := json.Unmarshal(raw, &result)
+	if err != nil {
+		log.Printf("err %v\n", err)
+	}
+	// log.Printf("data %v\n", result)
+	return
+}
+
 func homeHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("home\n")
 	target := os.Getenv("TITLE")
 	if target == "" {
 		target = "SimpleAuthWeb01"
@@ -29,10 +51,12 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		username = ""
 	}
+	people := loadData()
 	err = t.Execute(w, struct {
 		Title    string
 		Username string
-	}{Title: target, Username: username})
+		People   []Person
+	}{Title: target, Username: username, People: people})
 	if err != nil {
 		log.Printf("failed to execute template: %v", err)
 	}
@@ -94,6 +118,7 @@ func main() {
 
 	fs := http.FileServer(http.Dir("./static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
+	http.Handle("/favicon.ico", fs)
 	http.HandleFunc("/", homeHandler)
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/logout", logoutHandler)

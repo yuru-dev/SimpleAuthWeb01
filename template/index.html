@@ -14,5 +14,15 @@
       <a href="/login">Login</a>
     </div>
     {{ end }}
+
+    <table>
+      {{ range $i, $v := .People }}
+      <tr>
+        <td>{{ $i }}</td>
+        <td>{{ $v.Name }}</td>
+        <td>{{ $v.Email }}</td>
+      </tr>
+      {{ end }}
+    </table>
   </body>
 </html>
