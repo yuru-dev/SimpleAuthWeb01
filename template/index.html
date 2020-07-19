@@ -1,28 +1,11 @@
-<html>
-  <head>
-    <link rel="stylesheet" type="text/css" href="/static/base.css">
-  </head>
-  <body>
-    <h1>{{ .Title }}</h1>
-    {{ if .Username }}
-    <div>
-      username: {{ .Username }}
-      <a href="/logout">Logout</a>
-    </div>
-    {{ else }}
-    <div>
-      <a href="/login">Login</a>
-    </div>
-    {{ end }}
-
-    <table>
-      {{ range $i, $v := .People }}
-      <tr>
-        <td><a href="/person/{{ $i }}">{{ $i }}</a></td>
-        <td>{{ $v.Name }}</td>
-        <td>{{ $v.Email }}</td>
-      </tr>
-      {{ end }}
-    </table>
-  </body>
-</html>
+{{ define "body" }}
+<table class="table">
+  {{ range $i, $v := .Param }}
+  <tr>
+    <td><a href="/person/{{ $i }}">{{ $i }}</a></td>
+    <td>{{ $v.Name }}</td>
+    <td>{{ $v.Email }}</td>
+  </tr>
+  {{ end }}
+</table>
+{{ end }}

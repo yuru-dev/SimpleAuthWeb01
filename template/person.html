@@ -1,28 +1,30 @@
 {{ define "body" }}
+{{ with .Param }}
 <table class="table">
   <tr>
     <th>Name</th>
-    <td>{{ .Person.Name }}</td>
+    <td>{{ .Name }}</td>
   </tr>
   <tr>
     <th>Email</th>
-    <td>{{ .Person.Email }}</td>
+    <td>{{ .Email }}</td>
   </tr>
   <tr>
     <th>Company</th>
-    <td>{{ .Person.Company }}</td>
+    <td>{{ .Company }}</td>
   </tr>
   <tr>
     <th>City</th>
-    <td>{{ .Person.City }}</td>
+    <td>{{ .City }}</td>
   </tr>
   <tr>
     <th>Zip</th>
-    <td>{{ .Person.Zip }}</td>
+    <td>{{ .Zip }}</td>
   </tr>
   <tr>
     <th>Geo</th>
-    <td>{{ .Person.Geo }}</td>
+    <td>{{ .Geo }}</td>
   </tr>
 </table>
+{{ end }}
 {{ end }}

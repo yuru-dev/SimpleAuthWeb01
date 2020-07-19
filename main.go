@@ -38,29 +38,9 @@ func loadData() (result []Person) {
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	log.Printf("home\n")
-	target := os.Getenv("TITLE")
-	if target == "" {
-		target = "SimpleAuthWeb01"
-	}
-	t, err := template.ParseFiles("template/index.html")
-	if err != nil {
-		log.Fatalf("template error: %v", err)
-	}
 	session, _ := store.Get(r, sessionName)
-	username, ok := session.Values["username"].(string)
-	if !ok {
-		username = ""
-	}
 	people := loadData()
-	err = t.Execute(w, struct {
-		Title    string
-		Username string
-		People   []Person
-	}{Title: target, Username: username, People: people})
-	if err != nil {
-		log.Printf("failed to execute template: %v", err)
-	}
+	renderPage(w, r, session, "index.html", people)
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
@@ -114,25 +94,28 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func personHandler(w http.ResponseWriter, r *http.Request) {
-	i, _ := strconv.Atoi(r.URL.Path[8:])
-	log.Printf("person %v\n", i)
-	session, _ := store.Get(r, sessionName)
+func renderPage(w http.ResponseWriter, r *http.Request, session *sessions.Session, templateFilename string, param interface{}) {
 	username := session.Values["username"]
-	people := loadData()
-	person := people[i]
-	t, err := template.ParseFiles("template/base.html", "template/person.html")
+	t, err := template.ParseFiles("template/base.html", "template/"+templateFilename)
 	if err != nil {
 		log.Fatalf("template error: %v", err)
 	}
 	params := map[string]interface{}{
 		"Username": username,
-		"Person":   person,
+		"Param":    param,
 	}
 	err = t.Execute(w, params)
 	if err != nil {
 		log.Printf("failed to execute template: %v", err)
 	}
+}
+
+func personHandler(w http.ResponseWriter, r *http.Request) {
+	i, _ := strconv.Atoi(r.URL.Path[8:])
+	people := loadData()
+	person := people[i]
+	session, _ := store.Get(r, sessionName)
+	renderPage(w, r, session, "person.html", person)
 }
 
 func main() {
