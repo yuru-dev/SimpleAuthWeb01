@@ -18,7 +18,7 @@
     <table>
       {{ range $i, $v := .People }}
       <tr>
-        <td>{{ $i }}</td>
+        <td><a href="/person/{{ $i }}">{{ $i }}</a></td>
         <td>{{ $v.Name }}</td>
         <td>{{ $v.Email }}</td>
       </tr>

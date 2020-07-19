@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/gorilla/sessions"
 )
@@ -113,8 +114,25 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func personHandler(w http.ResponseWriter, r *http.Request) {
+	i, _ := strconv.Atoi(r.URL.Path[8:])
+	log.Printf("person %v\n", i)
+	people := loadData()
+	person := people[i]
+	t, err := template.ParseFiles("template/person.html")
+	if err != nil {
+		log.Fatalf("template error: %v", err)
+	}
+	err = t.Execute(w, struct {
+		Person Person
+	}{Person: person})
+	if err != nil {
+		log.Printf("failed to execute template: %v", err)
+	}
+}
+
 func main() {
-	log.Print("helloworld: starting server...")
+	log.Print("SimpleAuthWeb01: starting server...")
 
 	fs := http.FileServer(http.Dir("./static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
@@ -122,6 +140,7 @@ func main() {
 	http.HandleFunc("/", homeHandler)
 	http.HandleFunc("/login", loginHandler)
 	http.HandleFunc("/logout", logoutHandler)
+	http.HandleFunc("/person/", personHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
