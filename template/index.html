@@ -4,8 +4,15 @@
   </head>
   <body>
     <h1>{{ .Title }}</h1>
+    {{ if .Username }}
     <div>
       username: {{ .Username }}
+      <a href="/logout">Logout</a>
     </div>
+    {{ else }}
+    <div>
+      <a href="/login">Login</a>
+    </div>
+    {{ end }}
   </body>
 </html>

@@ -13,7 +13,7 @@ import (
 )
 
 var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
-var session_name = "session"
+var sessionName = "session"
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	target := os.Getenv("TITLE")
@@ -24,7 +24,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalf("template error: %v", err)
 	}
-	session, _ := store.Get(r, session_name)
+	session, _ := store.Get(r, sessionName)
 	username, ok := session.Values["username"].(string)
 	if !ok {
 		username = ""
@@ -39,6 +39,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Login\n")
 	w.Header().Set("Content-type", "text/html")
 	t, _ := template.ParseFiles("template/login.html")
 	r.ParseForm()
@@ -52,12 +53,13 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		tpassword := hex.EncodeToString(hasher.Sum(nil))
 		log.Printf("tpass:%v\n", tpassword)
 		if password == tpassword {
-			session, _ := store.Get(r, session_name)
+			session, _ := store.Get(r, sessionName)
 			session.Values["username"] = username
 			_ = session.Save(r, w)
 			http.Redirect(w, r, "/", 301)
 		} else {
 			message = "NG"
+			w.WriteHeader(401)
 		}
 		t.Execute(w, struct {
 			Message  string
@@ -70,6 +72,23 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func logoutHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Logout\n")
+	session, _ := store.Get(r, sessionName)
+	session.Values["username"] = ""
+	_ = session.Save(r, w)
+
+	t, err := template.ParseFiles("template/logout.html")
+	if err != nil {
+		log.Fatalf("template error: %v", err)
+	}
+	err = t.Execute(w, struct {
+	}{})
+	if err != nil {
+		log.Printf("failed to execute template: %v", err)
+	}
+}
+
 func main() {
 	log.Print("helloworld: starting server...")
 
@@ -77,6 +96,7 @@ func main() {
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/", homeHandler)
 	http.HandleFunc("/login", loginHandler)
+	http.HandleFunc("/logout", logoutHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
