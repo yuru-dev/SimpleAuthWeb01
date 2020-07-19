@@ -1,5 +1,10 @@
 {{ define "body" }}
 <table class="table">
+  <tr>
+    <th scope="col">#</th>
+    <th scope="col">Name</th>
+    <th scope="col">Email</th>
+  </tr>
   {{ range $v := .Param }}
   <tr>
     <td><a href="/person/{{ $v.ID }}">{{ $v.ID }}</a></td>
