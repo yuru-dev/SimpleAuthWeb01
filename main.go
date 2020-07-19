@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 
 	"github.com/gorilla/sessions"
@@ -51,24 +52,36 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, sessionName)
 	switch r.Method {
 	case http.MethodGet:
-		renderPage(w, r, session, "login.html", map[string]interface{}{})
+		q := r.URL.Query()["url"]
+		url := ""
+		if len(q) > 0 {
+			url = q[0]
+		}
+		renderPage(w, r, session, "login.html", map[string]interface{}{"Url": url})
 		break
 	case http.MethodPost:
 		r.ParseForm()
 		username := r.Form["username"][0]
 		password := r.Form["password"][0]
+		url := r.Form["url"][0]
 		hasher := md5.New()
 		hasher.Write([]byte(username))
 		md5password := hex.EncodeToString(hasher.Sum(nil))
 		if password == md5password {
 			session.Values["username"] = username
 			_ = session.Save(r, w)
-			http.Redirect(w, r, "/", 301)
+			redirectURL := "/"
+			urlCheckRegex := regexp.MustCompile("^/person/[0-9]+$")
+			if urlCheckRegex.MatchString(url) {
+				redirectURL = url
+			}
+			http.Redirect(w, r, redirectURL, 301)
 			break
 		}
 		param := map[string]interface{}{
 			"Message":  "Login Error",
 			"Username": username,
+			"Url":      url,
 		}
 		w.WriteHeader(401)
 		renderPage(w, r, session, "login.html", param)
