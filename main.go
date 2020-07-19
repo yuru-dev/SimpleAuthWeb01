@@ -109,6 +109,7 @@ func personHandler(w http.ResponseWriter, r *http.Request) {
 		person = people[i]
 		renderPage(w, r, session, "person.html", person)
 	} else {
+		w.WriteHeader(403)
 		renderPage(w, r, session, "person.html", i)
 	}
 }
