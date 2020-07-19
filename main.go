@@ -75,6 +75,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, sessionName)
 	session.Values["username"] = ""
+	_ = session.Save(r, w)
 	renderPage(w, r, session, "logout.html", nil)
 }
 
