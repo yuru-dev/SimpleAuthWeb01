@@ -1,10 +1,11 @@
+{{ define "body" }}
 <form method="post">
   <div>
-    {{ .Message }}
+    {{ .Param.Message }}
   </div>
   <div>
     <label for="username">username</label><br />
-    <input type="text" id="username" name="username" value="{{ .Username }}" />
+    <input type="text" id="username" name="username" value="{{ .Param.Username }}" />
   </div>
   <div>
     <label for="password">password</label><br />
@@ -14,3 +15,4 @@
     <input type="submit" />
   </div>
 </form>
+{{ end }}

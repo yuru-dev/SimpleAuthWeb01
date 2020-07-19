@@ -44,35 +44,30 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Login\n")
-	w.Header().Set("Content-type", "text/html")
-	t, _ := template.ParseFiles("template/login.html")
-	r.ParseForm()
+	session, _ := store.Get(r, sessionName)
 	switch r.Method {
+	case http.MethodGet:
+		renderPage(w, r, session, "login.html", map[string]interface{}{})
+		break
 	case http.MethodPost:
-		var message string
-		var username string = r.Form["username"][0]
-		var password string = r.Form["password"][0]
+		r.ParseForm()
+		username := r.Form["username"][0]
+		password := r.Form["password"][0]
 		hasher := md5.New()
 		hasher.Write([]byte(username))
-		tpassword := hex.EncodeToString(hasher.Sum(nil))
-		log.Printf("tpass:%v\n", tpassword)
-		if password == tpassword {
-			session, _ := store.Get(r, sessionName)
+		md5password := hex.EncodeToString(hasher.Sum(nil))
+		if password == md5password {
 			session.Values["username"] = username
 			_ = session.Save(r, w)
 			http.Redirect(w, r, "/", 301)
-		} else {
-			message = "NG"
-			w.WriteHeader(401)
+			break
 		}
-		t.Execute(w, struct {
-			Message  string
-			Username string
-		}{Message: message, Username: username})
-		break
-	case http.MethodGet:
-		t.Execute(w, nil)
+		param := map[string]interface{}{
+			"Message":  "Login Error",
+			"Username": username,
+		}
+		w.WriteHeader(401)
+		renderPage(w, r, session, "login.html", param)
 		break
 	}
 }
@@ -93,6 +88,7 @@ func renderPage(w http.ResponseWriter, r *http.Request, session *sessions.Sessio
 		"Username": username,
 		"Param":    param,
 	}
+	w.Header().Set("Content-type", "text/html")
 	err = t.Execute(w, params)
 	if err != nil {
 		log.Printf("failed to execute template: %v", err)
