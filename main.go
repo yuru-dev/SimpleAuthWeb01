@@ -78,20 +78,9 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Logout\n")
 	session, _ := store.Get(r, sessionName)
 	session.Values["username"] = ""
-	_ = session.Save(r, w)
-
-	t, err := template.ParseFiles("template/logout.html")
-	if err != nil {
-		log.Fatalf("template error: %v", err)
-	}
-	err = t.Execute(w, struct {
-	}{})
-	if err != nil {
-		log.Printf("failed to execute template: %v", err)
-	}
+	renderPage(w, r, session, "logout.html", nil)
 }
 
 func renderPage(w http.ResponseWriter, r *http.Request, session *sessions.Session, templateFilename string, param interface{}) {
